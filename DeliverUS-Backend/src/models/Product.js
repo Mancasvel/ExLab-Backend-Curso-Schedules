@@ -15,6 +15,7 @@ const loadModel = (sequelize, DataTypes) => {
 
       Product.belongsTo(models.Restaurant, { foreignKey: 'restaurantId', as: 'restaurant', onDelete: 'cascade' })
       Product.belongsTo(models.ProductCategory, { foreignKey: 'productCategoryId', as: 'productCategory' })
+      Product.belongsTo(models.Schedule, {foreignKey: 'scheduleId', as: 'schedule'})  // relacion a la que pertenece
       Product.belongsToMany(models.Order, { as: 'orders', through: OrderProducts })
     }
   }

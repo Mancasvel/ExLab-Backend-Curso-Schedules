@@ -27,6 +27,18 @@ module.exports = {
       availability: {
         type: Sequelize.BOOLEAN
       },
+      scheduleId: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+        references: {
+          model: {
+            tableName: 'Schedules'
+          },
+          key: 'id'
+        },
+        onDelete: 'SET NULL',
+        onUpdate: 'CASCADE'
+      },
       restaurantId: {
         type: Sequelize.INTEGER,
         allowNull: false,
