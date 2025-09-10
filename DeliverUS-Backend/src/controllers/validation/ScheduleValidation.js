@@ -17,10 +17,31 @@ const validateEndTimeAfterStartTime = (endTime, { req }) => {
 }
 
 const create = [
+  check('startTime')
+    .exists().withMessage('Start time is required')
+    .custom(validateTimeFormat)
+    .trim(),
+
+  check('endTime')
+    .exists().withMessage('End time is required')
+    .custom(validateTimeFormat)
+    .custom(validateEndTimeAfterStartTime)
+    .trim()
 
 ]
 
 const update = [
+
+  check('startTime')
+    .optional()       //optional por si no modificamos todos los campos
+    .custom(validateTimeFormat)
+    .trim(),
+
+  check('endTime')
+    .optional()       //optional por si no modificamos todos los campos
+    .custom(validateTimeFormat)
+    .custom(validateEndTimeAfterStartTime)
+    .trim()
 
 ]
 
