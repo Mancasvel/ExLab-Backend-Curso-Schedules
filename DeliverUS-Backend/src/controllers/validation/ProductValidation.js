@@ -16,6 +16,21 @@ const checkRestaurantExists = async (value, { req }) => {
 }
 
 const checkScheduleBelongsToRestaurantOnCreate = async (value, { req }) => {
+   // value = scheduleId que viene en el body
+  if (!value) return true; // si no se envía scheduleId, no hay nada que validar
+
+  const schedule = await Schedule.findByPk(value);
+  const restaurantId = req.body.restaurantId;
+
+  if (!schedule) {
+    throw new Error('Schedule not found');
+  }
+
+  if (schedule.restaurantId !== parseInt(restaurantId)) {
+    throw new Error('The schedule must belong to the restaurant');
+  }
+
+  return true;
 
 }
 
