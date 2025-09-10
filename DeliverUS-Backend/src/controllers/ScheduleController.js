@@ -1,17 +1,81 @@
 import { Schedule } from '../models/models.js'
+import { validateTimeFormat, validateEndTimeAfterStartTime } from '../controllers/validation/ScheduleValidation.js';
 
+
+// rf1
 const indexRestaurant = async function (req, res) {
-  res.status(500).send('To be implemented')
-}
+  try {
+    // Aseguramos que req.restaurant existe
+    if (!req.restaurant || !req.restaurant.id) {
+      return res.status(404).json({ message: 'Restaurant not found' });
+    }
 
+    const schedules = await Schedule.findAll({
+      where: { restaurantId: req.restaurant.id }
+    });
+
+    res.status(200).json(schedules);
+
+  } catch (error) {
+    console.error('Error en ScheduleController.index:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+// rf2
 const create = async function (req, res) {
-  res.status(500).send('To be implemented')
-}
+  try {
+    // 1️⃣ Verificar que el usuario esté logueado
+    if (!req.user) {
+      return res.status(401).json({ message: 'User is not logged in' });
+    }
 
+    // 2️⃣ Verificar que el restaurante exista
+    if (!req.restaurant) {
+      return res.status(404).json({ message: 'Restaurant does not exist' });
+    }
+
+    // 3️⃣ Verificar que el usuario sea el propietario
+    const userId = req.user.id;
+    const restaurantOwnerId = req.restaurant.userId;
+    if (userId !== restaurantOwnerId) {
+      return res.status(403).json({ message: 'User is not the restaurant owner' });
+    }
+
+    // 4️⃣ Validar los atributos startTime y endTime
+    const { startTime, endTime } = req.body;
+
+    if (!startTime || !endTime) {
+      return res.status(422).json({ message: 'startTime and endTime are required' });
+    }
+
+    try {
+      validateTimeFormat(startTime);
+      validateTimeFormat(endTime);
+      validateEndTimeAfterStartTime(endTime, { body: { startTime } });
+    } catch (validationError) {
+      return res.status(422).json({ message: validationError.message });
+    }
+
+    // 5️⃣ Crear el schedule
+    const schedule = await Schedule.create({
+      startTime,
+      endTime,
+      restaurantId: req.restaurant.id
+    });
+
+    return res.status(201).json(schedule);
+
+  } catch (error) {
+    console.error('Error creating a schedule:', error);
+    return res.status(500).json({ message: 'Internal Server Error', error });
+  }
+};
+// rf3
 const update = async function (req, res) {
   res.status(500).send('To be implemented')
 }
-
+// rf4
 const destroy = async function (req, res) {
   res.status(500).send('To be implemented')
 }
