@@ -122,8 +122,39 @@ const update = async (req, res) => {
 
 // rf4
 const destroy = async function (req, res) {
-  res.status(500).send('To be implemented')
-}
+  try {
+    // 1️⃣ Usuario logueado
+    if (!req.user) {
+      return res.status(401).json({ message: 'User is not logged in' });
+    }
+
+    // 2️⃣ Restaurante existe
+    if (!req.restaurant) {
+      return res.status(404).json({ message: 'Restaurant does not exist' });
+    }
+
+    // 3️⃣ Usuario es propietario
+    if (req.user.id !== req.restaurant.userId) {
+      return res.status(403).json({ message: 'User is not the restaurant owner' });
+    }
+
+    // 4️⃣ Horario existe
+    const schedule = await Schedule.findByPk(req.params.scheduleId);
+    if (!schedule || schedule.restaurantId !== req.restaurant.id) {
+      return res.status(404).json({ message: 'Schedule not found' });
+    }
+
+    // 5️⃣ Eliminar el horario
+    await schedule.destroy();
+
+    return res.status(200).json({ message: 'Schedule deleted successfully' });
+
+  } catch (error) {
+    console.error('Error deleting schedule:', error);
+    return res.status(500).json({ message: 'Internal Server Error', error });
+  }
+};
+
 
 const ScheduleController = {
   indexRestaurant,
